@@ -28,14 +28,14 @@ module riscv_core
 // Params
 //-----------------------------------------------------------------
 #(
-     parameter SUPPORT_BRANCH_PREDICTION = 1
-    ,parameter SUPPORT_MULDIV   = 1
+     parameter SUPPORT_BRANCH_PREDICTION = 0
+    ,parameter SUPPORT_MULDIV   = 0
     ,parameter SUPPORT_SUPER    = 0
     ,parameter SUPPORT_MMU      = 0
-    ,parameter SUPPORT_DUAL_ISSUE = 1
-    ,parameter SUPPORT_LOAD_BYPASS = 1
-    ,parameter SUPPORT_MUL_BYPASS = 1
-    ,parameter SUPPORT_REGFILE_XILINX = 0
+    ,parameter SUPPORT_DUAL_ISSUE = 0
+    ,parameter SUPPORT_LOAD_BYPASS = 0
+    ,parameter SUPPORT_MUL_BYPASS = 0
+    ,parameter SUPPORT_REGFILE_XILINX = 1
     ,parameter EXTRA_DECODE_STAGE = 0
     ,parameter MEM_CACHE_ADDR_MIN = 32'h80000000
     ,parameter MEM_CACHE_ADDR_MAX = 32'h8fffffff
@@ -65,7 +65,7 @@ module riscv_core
     ,input           mem_i_valid_i
     ,input           mem_i_error_i
     ,input  [ 63:0]  mem_i_inst_i
-    ,input           intr_i
+    ,input  [ 31:0]  intr_i
     ,input  [ 31:0]  reset_vector_i
     ,input  [ 31:0]  cpu_id_i
 

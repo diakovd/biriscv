@@ -1,37 +1,10 @@
+`define TRACE 1
+
 module tb_top;
 
-reg clk;
+reg clk =0;
 reg rst;
 
-reg [7:0] mem[131072:0];
-integer i;
-integer f;
-
-initial
-begin
-    $display("Starting bench");
-
-    if (`TRACE)
-    begin
-        $dumpfile("waveform.vcd");
-        $dumpvars(0, tb_top);
-    end
-
-    // Reset
-    clk = 0;
-    rst = 1;
-    repeat (5) @(posedge clk);
-    rst = 0;
-
-    // Load TCM memory
-    for (i=0;i<131072;i=i+1)
-        mem[i] = 0;
-
-    f = $fopenr("./build/tcm.bin");
-    i = $fread(mem, f);
-    for (i=0;i<131072;i=i+1)
-        u_mem.write(i, mem[i]);
-end
 
 initial
 begin
@@ -134,4 +107,19 @@ u_mem
     ,.mem_d_resp_tag_o(mem_d_resp_tag_w)
 );
 
+initial
+begin
+    $display("Starting bench");
+
+    if (`TRACE)
+    begin
+        $dumpfile("waveform.vcd");
+        $dumpvars(0, tb_top);
+    end
+
+    // Reset
+    rst = 1;
+    repeat (5) @(posedge clk);
+    rst = 0;
+end
 endmodule

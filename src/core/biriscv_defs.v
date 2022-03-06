@@ -508,7 +508,7 @@
 `define MCAUSE_PAGE_FAULT_INST          ((0 << `MCAUSE_INT) | 12)
 `define MCAUSE_PAGE_FAULT_LOAD          ((0 << `MCAUSE_INT) | 13)
 `define MCAUSE_PAGE_FAULT_STORE         ((0 << `MCAUSE_INT) | 15)
-`define MCAUSE_INTERRUPT                (1 << `MCAUSE_INT)
+`define MCAUSE_INTERRUPT                ( 1 << `MCAUSE_INT)
 
 //--------------------------------------------------------------------
 // Debug

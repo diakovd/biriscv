@@ -156,6 +156,8 @@ reg                         invalidate_q;
 
 reg [0:0]  replace_way_q;
 
+reg [ICACHE_TAG_REQ_LINE_W-1:0] flush_addr_q;
+
 //-----------------------------------------------------------------
 // Lookup validation
 //-----------------------------------------------------------------
@@ -383,7 +385,7 @@ u_data1
 //-----------------------------------------------------------------
 // Flush counter
 //-----------------------------------------------------------------
-reg [ICACHE_TAG_REQ_LINE_W-1:0] flush_addr_q;
+
 
 always @ (posedge clk_i or posedge rst_i)
 if (rst_i)

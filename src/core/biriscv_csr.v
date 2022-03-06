@@ -38,7 +38,7 @@ module biriscv_csr
     // Inputs
      input           clk_i
     ,input           rst_i
-    ,input           intr_i
+    ,input  [ 31:0]  intr_i
     ,input           opcode_valid_i
     ,input  [ 31:0]  opcode_opcode_i
     ,input  [ 31:0]  opcode_pc_i
@@ -136,7 +136,7 @@ wire satp_update_w = (opcode_valid_i && (set_r || clr_r) && csr_write_r && (opco
 //-----------------------------------------------------------------
 // CSR register file
 //-----------------------------------------------------------------
-wire timer_irq_w = 1'b0;
+wire timer_irq_w;
 
 wire [31:0] misa_w = SUPPORT_MULDIV ? (`MISA_RV32 | `MISA_RVI | `MISA_RVM): (`MISA_RV32 | `MISA_RVI);
 
@@ -157,7 +157,7 @@ u_csrfile
      .clk_i(clk_i)
     ,.rst_i(rst_i)
 
-    ,.ext_intr_i(intr_i)
+    ,.ext_intr_i(ext_int)
     ,.timer_intr_i(timer_irq_w)
     ,.cpu_id_i(cpu_id_i)
     ,.misa_i(misa_w)
@@ -188,6 +188,8 @@ u_csrfile
     // Masked interrupt output
     ,.interrupt_o(interrupt_w)
 );
+ assign ext_int 	= intr_i[11];
+ assign timer_irq_w = intr_i[7];
 
 //-----------------------------------------------------------------
 // CSR Read Result (E1) / Early exceptions

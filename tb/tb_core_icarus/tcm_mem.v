@@ -129,5 +129,23 @@ begin
 end
 endtask
 
+reg [7:0] mem[131072:0];
+integer i;
+integer f;
+
+initial
+begin
+    // Load TCM memory
+    for (i=0;i<131072;i=i+1)
+        mem[i] = 0;
+
+    // f = $fopen("program8.hex","r");
+    // i = $fread(mem, f);
+	$readmemh("program8.hex", mem);
+	
+    for (i=0;i<131072;i=i+1)
+        write(i, mem[i]);
+		
+end
 
 endmodule
