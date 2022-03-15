@@ -1,5 +1,12 @@
- `include "../example_tb/fpga_sys/source/defines.sv"
- `include "../example_tb/fpga_sys/source/peripherial/uart_module/defUART.v"
+`ifdef Sim
+	`include "../src/peripherial/defines.sv"
+	`include "../src/peripherial/uart_module/defUART.sv"
+	
+	 `timescale 1 ps / 1 ps
+`else
+  `include "defines.sv"
+  `include "defUART.sv"
+`endif
  
  //`timescale 1 ps / 1 ps
  
@@ -112,7 +119,8 @@
 	CR = CR | (1'b1 << 5); //set Rx Error Status Interrupt
 	//CR = CR | (1'b1 << 6); //Internal Loop TX to RX
 	busWR8(`defU_CR, CR); //Set Odd parity
-	busWR8(`defU_DLL,`BR1843200); //Set
+	busWR8(`defU_DLH, 0); //Set
+	busWR8(`defU_DLL, 8); //Set
 	
 	
 	#10000000;
@@ -261,7 +269,7 @@
 	forever  #34000 Clk_14MHz = ~Clk_14MHz;
  end
 	
- UART UART_insts(
+ UART_wb UART_insts(
   	.CPUdat(CPUdat),
 	.CPUctr(CPUctr),
  

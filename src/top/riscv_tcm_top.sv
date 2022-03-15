@@ -115,6 +115,7 @@ module riscv_tcm_top
 	AXI4bus.Master axiBus_TM,  
 	AXI4bus.Master axiBus_TM1,  
 	AXI4bus.Master axiBus_mtimer,
+	AXI4bus.Slave  axiBus_BootLoader,
 
     input  [ 31:0]  intr_i
 );
@@ -172,6 +173,17 @@ wire           dport_axi_flush_w;
 wire           dport_tcm_error_w;
 wire           dport_accept_w;
 
+ 
+wire  [ 31:0]  mem_d_addr_i;
+wire  [ 31:0]  mem_d_data_wr_i;
+wire           mem_d_rd_i;
+wire  [  3:0]  mem_d_wr_i;
+wire           mem_d_cacheable_i;
+wire  [ 10:0]  mem_d_req_tag_i;
+wire           mem_d_invalidate_i;
+wire           mem_d_writeback_i;
+wire           mem_d_flush_i;
+	
 riscv_core
 #(
      .MEM_CACHE_ADDR_MIN(MEM_CACHE_ADDR_MIN)
@@ -247,7 +259,7 @@ u_dmux
 (
     // Inputs
     .clk_i(clk_i),
-    .rst_i(rst_i),
+    .rst_i(rst_cpu_i),
     .mem_addr_i(dport_addr_w),
     .mem_data_wr_i(dport_data_wr_w),
     .mem_rd_i(dport_rd_w),
@@ -316,15 +328,15 @@ u_tcm
     ,.mem_i_flush_i(ifetch_flush_w)
     ,.mem_i_invalidate_i(ifetch_invalidate_w)
     ,.mem_i_pc_i(ifetch_pc_w)
-    ,.mem_d_addr_i(dport_tcm_addr_w)
-    ,.mem_d_data_wr_i(dport_tcm_data_wr_w)
-    ,.mem_d_rd_i(dport_tcm_rd_w)
-    ,.mem_d_wr_i(dport_tcm_wr_w)
-    ,.mem_d_cacheable_i(dport_tcm_cacheable_w)
-    ,.mem_d_req_tag_i(dport_tcm_req_tag_w)
-    ,.mem_d_invalidate_i(dport_tcm_invalidate_w)
-    ,.mem_d_writeback_i(dport_tcm_writeback_w)
-    ,.mem_d_flush_i(dport_tcm_flush_w)
+    ,.mem_d_addr_i(mem_d_addr_i)
+    ,.mem_d_data_wr_i(mem_d_data_wr_i)
+    ,.mem_d_rd_i(mem_d_rd_i)
+    ,.mem_d_wr_i(mem_d_wr_i)
+    ,.mem_d_cacheable_i(mem_d_cacheable_i)
+    ,.mem_d_req_tag_i(mem_d_req_tag_i)
+    ,.mem_d_invalidate_i(mem_d_invalidate_i)
+    ,.mem_d_writeback_i(mem_d_writeback_i)
+    ,.mem_d_flush_i(mem_d_flush_i)
     ,.axi_awvalid_i(axi_t_awvalid_i)
     ,.axi_awaddr_i(axi_t_awaddr_i)
     ,.axi_awid_i(axi_t_awid_i)
@@ -364,7 +376,19 @@ u_tcm
     ,.axi_rid_o(axi_t_rid_o)
     ,.axi_rlast_o(axi_t_rlast_o)
 );
+ 
+ assign mem_d_addr_i 		= (rst_cpu_i)? axiBus_BootLoader.awaddr : dport_tcm_addr_w;
+ assign mem_d_data_wr_i 	= (rst_cpu_i)? axiBus_BootLoader.wdata : dport_tcm_data_wr_w;
+ assign mem_d_rd_i 			= (rst_cpu_i)? 1'b0 : dport_tcm_rd_w;
+ assign mem_d_wr_i 			= (rst_cpu_i)? ((axiBus_BootLoader.wvalid)? axiBus_BootLoader.wstrb : 0): dport_tcm_wr_w;
+ assign mem_d_cacheable_i 	= (rst_cpu_i)? 1'b0 : dport_tcm_cacheable_w;
+ assign mem_d_req_tag_i 	= (rst_cpu_i)? 0    : dport_tcm_req_tag_w;
+ assign mem_d_invalidate_i	= (rst_cpu_i)? 1'b0 : dport_tcm_invalidate_w;
+ assign mem_d_writeback_i 	= (rst_cpu_i)? 1'b0 : dport_tcm_writeback_w;
+ assign mem_d_flush_i 		= (rst_cpu_i)? 1'b0 : dport_tcm_flush_w;
 
+ assign axiBus_BootLoader.awready	= dport_tcm_ack_w;
+ assign axiBus_BootLoader.wready	= dport_tcm_ack_w;
  
 // dport_axi
 // u_axi
@@ -432,29 +456,19 @@ wire [13 : 0] probe8;
 	.probe8(probe8)
 );
 
- assign probe0 = axiBus_UART.wdata;
- assign probe1 = axiBus_UART.rdata;
- assign probe2 = axiBus_UART.araddr;
- 
- // assign probe0 = ifetch_pc_w;
- // assign probe1 = dport_addr_w;
- // assign probe2 = dport_data_wr_w;
+ assign probe0 = ifetch_pc_w;
+ assign probe1 = dport_addr_w;
+ assign probe2 = dport_data_wr_w;
  assign probe3 = dport_tcm_data_rd_w;
  assign probe4 = ifetch_inst_w;
  assign probe5 = 0;
  assign probe6 = 0;
  assign probe7 = dport_wr_w;
  
- 
- assign probe8[0] = axiBus_UART.arvalid;
- assign probe8[1] = axiBus_UART.rvalid;
- assign probe8[2] = axiBus_UART.wvalid;
- assign probe8[3] = axiBus_UART.wready; 
- 
- // assign probe8[0] = ifetch_rd_w;
- // assign probe8[1] = ifetch_flush_w;
- // assign probe8[2] = dport_invalidate_w;
- // assign probe8[3] = dport_rd_w;
+ assign probe8[0] = ifetch_rd_w;
+ assign probe8[1] = ifetch_flush_w;
+ assign probe8[2] = dport_invalidate_w;
+ assign probe8[3] = dport_rd_w;
  assign probe8[4] = dport_cacheable_w;
  assign probe8[5] = ifetch_invalidate_w;
  assign probe8[6] = dport_writeback_w;

@@ -51,13 +51,15 @@ Purpose : Generic application start
 #include <stdint.h>
 #include <string.h>
 #include "../ibex_core_pkg/ibex_core.h"
-//#include "include/const.h"
+#include "include/const.h"
 //#include "include/gd32vf103.h"
 #include "include/mtime.h"
 //#include "__SEGGER_RTL.h"
 #include "__SEGGER_RTL_Int.h"
 
 #define CORECLOCK 40000000
+
+int32_t         Int_Glob;
 
 struct __SEGGER_RTL_FILE_impl {         // NOTE: Provides implementation for FILE
   int stub; // only needed so impl has size != 0.
@@ -199,8 +201,8 @@ void init_UART(void) {
  //CR = CR | (1'b1 << 6); //Internal Loop TX to RX
 
   UART0_REG(dCR_UART) = CR; //Set Odd parity
-  UART0_REG(dDLL_UART) = BR115200 & 0xFF; //Set 
-  UART0_REG(dDLH_UART) = BR115200 >> 8; //Set 
+  UART0_REG(dDLL_UART) = BR921600 & 0xFF; //Set 
+  UART0_REG(dDLH_UART) = BR921600 >> 8; //Set 
 }
 
 uint32_t get_us()
@@ -218,10 +220,15 @@ uint64_t  Begin_Time;
 int __SEGGER_RTL_X_file_write (__SEGGER_RTL_FILE *__stream, const char *__s, unsigned __len)
 {
   //HAL_UART_Transmit(&huart1, __s, __len, 10);
-  int i;
+  int i, j;
   uint8_t st;
   for(i = 0; i < __len; i++) {
-	while(dTxFull & UART0_REG(dFCR_UART)){}; //wait not full fifo tx 
+	//j = UART0_REG(dFCR_UART);  
+	//IO_REG32(0) = j;  
+	while(dTxFull & UART0_REG(dFCR_UART)){
+		//j = UART0_REG(dFCR_UART);  
+		//IO_REG32(0) = j; 		
+	}; //wait not full fifo tx 
 	UART0_REG(dFIFOtx_UART) = __s[i];
   }
   return 0;
@@ -263,12 +270,13 @@ void main(void) {
 //  init_timer1();
 //  init_intrupt();
     init_UART();
-	
+
+
 
     extern void dhry();
     dhry();
 
-    return 0;
+	return 0;
 }
 
 /*
@@ -362,7 +370,7 @@ Boolean Func_2( Str_30 Str_1_Par_Ref, Str_30 Str_2_Par_Ref );
 
 Rec_Pointer     Ptr_Glob,
                 Next_Ptr_Glob;
-int             Int_Glob;
+
 Boolean         Bool_Glob;
 char            Ch_1_Glob,
                 Ch_2_Glob;
@@ -414,10 +422,11 @@ void dhry() {
         Str_30          Str_2_Loc;
   REG   int             Run_Index;
 #define  Number_Of_Runs  1000000
+//#define  Number_Of_Runs  0
 
   /* Initializations */
 
-  puts("Dhrystone Benchmark, Version 2.1 (Language: C)");
+  puts("Dhrystone Benchmark, Version 2.1 (Language: C)222");
   static Rec_Type t1, t2;
   Next_Ptr_Glob = (Rec_Pointer)&t1;
   Ptr_Glob = (Rec_Pointer)&t2;
@@ -498,7 +507,7 @@ void dhry() {
   printf ("\r\n");
   printf ("Final values of the variables used in the benchmark:\r\n");
   printf ("\r\n");
-  printf ("Int_Glob:            %d\r\n", Int_Glob);
+  printf ("Int_Glob:            %d \n", Int_Glob);
   printf ("        should be:   %d\r\n", 5);
   printf ("Bool_Glob:           %d\r\n", Bool_Glob);
   printf ("        should be:   %d\r\n", 1);
@@ -571,7 +580,7 @@ void dhry() {
     printf("%lu\n", (uint32_t) Microseconds);
     printf("Dhrystones per Second: ");
     printf("%lu\n", (uint32_t) Dhrystones_Per_Second);
-    printf("VAX MIPS rating = ");
+    printf("VAX MIPS rating 222 = ");
     printf("%lu\n", (uint32_t) Vax_Mips);
   }
 }

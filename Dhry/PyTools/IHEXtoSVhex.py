@@ -1,4 +1,4 @@
-fr=open("./Hello/Output/Release/Exe/Hello.hex", "r")
+fr=open("../Segger_pr/Output/Release/Exe/Dhry.hex", "r")
 fw= open("program.hex","w")
 print (fr)
 print (fw)

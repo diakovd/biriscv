@@ -25,7 +25,7 @@
 	input Clk_14MHz 
  );
   
-  parameter VENDOR = "Xilinx"; //optional "IntelFPGA"
+  parameter VENDOR = "Simulation";  //optional "IntelFPGA" "Xilinx";
   parameter int addrBase = 0;
 
  CONTROL_REGISTER CR;

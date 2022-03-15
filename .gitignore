@@ -3,9 +3,11 @@ docs/riscv_isa_spec.pdf
 docs/riscv_privileged_spec.pdf
 docs/ZYNQ_BAJIE_BOARD-master.zip
 
-Viv_pr/
+Viv_pr/**
+!Viv_pr/biriscv_sys_atrix7.sv
+!Viv_pr/biriscv_sys.sv
 
-ms/
+ms/**
 !ms/program8.hex
 !ms/Run_sim.tcl
 !ms/wave.do

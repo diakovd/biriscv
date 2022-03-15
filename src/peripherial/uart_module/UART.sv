@@ -150,16 +150,17 @@ logic [31:0] addrHreg_rd;
 
  assign addrH_rd    = (axiBus.arvalid)? axiBus.araddr: addrHreg_rd;
 
- assign addr_rd = addrH_rd - addrBase;
+ assign addr_rd = addr;// addrH_rd - addrBase;
  always @(posedge Clk) rd <= axiBus.arvalid;
  assign axiBus.rvalid = rd;
  
- assign axiBus.rdata = {RDdata,RDdata,RDdata,RDdata}; 	
+ // assign axiBus.rdata = {RDdata,RDdata,RDdata,RDdata}; 	
 	
 //write registers
  always @(posedge Clk) begin
 	if(Rst) begin
 		CR <= 0;
+		FCR.bit_7 	<= 0;
 		FCR.TxClear <= 0;
 		FCR.RxClear <= 0;
 		FCR.TxEmpty <= 0;
@@ -257,23 +258,35 @@ logic [31:0] addrHreg_rd;
  
 
  //Read registers
+ // always_comb begin
+ 
+ 	// if     (addr_rd == `defU_FIFOrx) RDdata <= dout_rx;	
+ 	// else if(addr_rd == `defU_CR)  	 RDdata <= CR;	
+	// else if(addr_rd == `defU_FCR)    RDdata <= FCR;	
+	// else if(addr_rd == `defU_TxCntL) RDdata <= TxCnt[7:0];	
+	// else if(addr_rd == `defU_TxCntH) RDdata <= TxCnt[15:8];	
+	// else if(addr_rd == `defU_RxCntL) RDdata <= RxCnt[7:0];	
+	// else if(addr_rd == `defU_RxCntH) RDdata <= RxCnt[15:8];	
+	// else if(addr_rd == `defU_ISR)    RDdata <= ISR;	
+	// else if(addr_rd == `defU_ESR)    RDdata <= ESR;	
+	// else if(addr_rd == `defU_DLL)    RDdata <= DLR[7:0];	
+	// else if(addr_rd == `defU_DLH)    RDdata <= DLR[15:8];	
+	// else RDdata <= 0;
+ 
+ // end
+
+
+ //Read registers
  always_comb begin
  
- 	if     (addr_rd == `defU_FIFOrx) RDdata <= dout_rx;	
- 	else if(addr_rd == `defU_CR)  	 RDdata <= CR;	
-	else if(addr_rd == `defU_FCR)    RDdata <= FCR;	
-	else if(addr_rd == `defU_TxCntL) RDdata <= TxCnt[7:0];	
-	else if(addr_rd == `defU_TxCntH) RDdata <= TxCnt[15:8];	
-	else if(addr_rd == `defU_RxCntL) RDdata <= RxCnt[7:0];	
-	else if(addr_rd == `defU_RxCntH) RDdata <= RxCnt[15:8];	
-	else if(addr_rd == `defU_ISR)    RDdata <= ISR;	
-	else if(addr_rd == `defU_ESR)    RDdata <= ESR;	
-	else if(addr_rd == `defU_DLL)    RDdata <= DLR[7:0];	
-	else if(addr_rd == `defU_DLH)    RDdata <= DLR[15:8];	
-	else RDdata <= 0;
- 
- end
- 
+ 	if     (addr_rd == 0) axiBus.rdata <= {TxCnt[7:0], FCR, CR, dout_rx};	
+ 	else if(addr_rd == 1) axiBus.rdata <= {ISR, RxCnt[15:8], RxCnt[7:0], TxCnt[15:8]};
+ 	else if(addr_rd == 2) axiBus.rdata <= {8'h00, DLR[15:8], DLR[7:0], ESR};
+ 	else axiBus.rdata <= 0;
+	
+ end  
+  
+  
 generate
 if(VENDOR == "Xilinx") begin
 
@@ -623,32 +636,5 @@ endgenerate
 		endcase
 	end
  end
-
-`ifndef Sim
-logic [7 : 0] probe2;
-logic [7 : 0] probe1;
-logic [7 : 0] probe0;
- 
- ila_1 ila_1_inst(
-    .clk(Clk_14MHz),
-    //.probe3(1'b0),    
-    .probe0(probe0),
-    .probe1(dout_tx),
-    .probe2(wrdata)
-
-);
-
- assign probe2 = 8'h00; //wrdata;
- assign probe1 = 8'h00; //dout_tx;
-
- assign probe0[0] = TX; 
- assign probe0[1] = RX; 
- assign probe0[2] = rd_tx; 
- assign probe0[3] = wr & addr == `defU_FIFOtx; 
- assign probe0[4] = 0; 
- assign probe0[5] = 0; 
- assign probe0[6] = 0; 
- assign probe0[7] = 0;  
- `endif
  
  endmodule

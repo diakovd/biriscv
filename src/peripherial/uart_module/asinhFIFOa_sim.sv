@@ -1,7 +1,7 @@
 module asinhFIFOa_sim
   #(
-	parameter bw_addr = 7, 	// addr in wight
-	parameter bw = 32, 		// data in wight
+	parameter bw_addr = 8, 	// addr in wight
+	parameter bw = 8, 		// data in wight
 	parameter alfull = 30   // 
    )
    (rst,
@@ -52,8 +52,14 @@ module asinhFIFOa_sim
  reg  [bw - 1:0] ram [(2**bw_addr)-1:0];
  wire [bw - 1:0] dout;   
 
+ int i;
+
  assign wr_data_count = (ctrWr_WRs >= ctrRd_WRs)?  (ctrWr_WRs - ctrRd_WRs): (ctrWr_WRs + (2**bw_addr - ctrRd_WRs));
  assign rd_data_count = (ctrWr_WRs >= ctrRd_WRs)?  (ctrWr_RDs - ctrRd_RDs): (ctrWr_RDs + (2**bw_addr - ctrRd_RDs));
+
+ initial begin
+	for(i = 0; i < 2**bw_addr; i = i + 1) ram[i] = 0;
+ end
 
  always @(posedge wr_clk) begin
 	if (wr_en) ram[ctrWr_WRs] <= din;

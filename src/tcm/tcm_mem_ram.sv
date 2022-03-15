@@ -26,7 +26,7 @@
 module tcm_mem_ram
 #(
 	 parameter VENDOR = "Xilinx",
-     parameter TCM_MEM_DEPTH   = 16 // KByte
+     parameter TCM_MEM_DEPTH   = 32 // KByte
 )
 (
     // Inputs

@@ -1,5 +1,5 @@
 import serial
-ser = serial.Serial(port = 'COM3', baudrate=921600, parity=serial.PARITY_ODD)
+ser = serial.Serial(port = 'COM8', baudrate=921600, parity=serial.PARITY_ODD)
 if(ser.isOpen() == False):
     ser.open()
 
@@ -60,7 +60,6 @@ for i in range(0,32):
 
 fd.close()    
 ser.close()         # close port
-<<<<<<< HEAD
 print("program.hex loaded")
-=======
->>>>>>> a5fb7fa1b2e5dbb97f76ff515ded9d7d47ea5945
+
+

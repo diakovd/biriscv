@@ -13,7 +13,7 @@
  *****************************************************************************/
 
 // Memory map
-#define IO_BASE_ADDR 0x4000
+#define IO_BASE_ADDR 0x8000
 #define IO_SIZE      0x0000c
 #define UART0_BASE_ADDR (IO_BASE_ADDR + IO_SIZE)
 #define UART0_SIZE   0x00014

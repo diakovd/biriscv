@@ -17,14 +17,16 @@
 // 460800 BaudRate = 16
 // 921600 BaudRate = 8
 
-`include "../example_tb/fpga_sys/source/defines.sv"
-// `include "defines.sv"
+`ifdef Sim
+	`include "../src/peripherial/defines.sv"
+`else
+  `include "defines.sv"
+`endif
 
  module BootLoader(
 	input RX, //RX UART line
 		
-	DatBus.Master CPUdat,
-	CtrBus.Master CPUctr,
+	AXI4bus.Master axiBus,
 		
 	output logic Rst_out,
 	input Rst,
@@ -55,6 +57,14 @@
   waitRst, waitRst_st1, waitRst_st2, waitOn_st1
   } fsm_stateRst; 
  fsm_stateRst stateRst;
+
+ typedef enum{
+  idle_axi4, st1_axi4, st2_axi4
+  } fsm_state_axi4; 
+ fsm_state_axi4 state_axi4;
+ 
+ logic enAddr;
+ logic enData;
 
  logic [7:0] shiftIN;
  logic wr_rx;
@@ -216,14 +226,67 @@
   end
  end
  
- assign CPUdat.addr = {StartAddr[31 - 2:0],2'b00} + ctrB;
- assign CPUdat.wdata = {dataRx,dataRx,dataRx,dataRx};
- assign CPUctr.we   = wr;
- assign CPUctr.req  = wr;
- assign CPUdat.be[0] = (CPUdat.addr[1:0] == 0)? 1: 0;
- assign CPUdat.be[1] = (CPUdat.addr[1:0] == 1)? 1: 0;
- assign CPUdat.be[2] = (CPUdat.addr[1:0] == 2)? 1: 0;
- assign CPUdat.be[3] = (CPUdat.addr[1:0] == 3)? 1: 0;
+ // assign CPUdat.addr = {StartAddr[31 - 2:0],2'b00} + ctrB;
+ // assign CPUdat.wdata = {dataRx,dataRx,dataRx,dataRx};
+ // assign CPUctr.we   = wr;
+ // assign CPUctr.req  = wr;
+ assign axiBus.wstrb[0] = (axiBus.awaddr[1:0] == 0)? 1: 0;
+ assign axiBus.wstrb[1] = (axiBus.awaddr[1:0] == 1)? 1: 0;
+ assign axiBus.wstrb[2] = (axiBus.awaddr[1:0] == 2)? 1: 0;
+ assign axiBus.wstrb[3] = (axiBus.awaddr[1:0] == 3)? 1: 0;
+ 
+
+
+ always @(posedge Clk) begin
+
+  if(Rst) begin
+	state_axi4		<= idle_axi4;
+	axiBus.awaddr  	<= 0;
+	axiBus.wdata   	<= 0;
+	axiBus.awvalid 	<= 0;
+	axiBus.wvalid  	<= 0;
+  end
+  else begin
+
+	case(state_axi4)
+		idle_axi4 : begin
+			if(wr) begin
+				axiBus.awaddr  <= {StartAddr[31 - 2:0],2'b00} + ctrB;
+				axiBus.wdata   <= {dataRx,dataRx,dataRx,dataRx};
+				axiBus.awvalid <= 1;
+				axiBus.wvalid  <= 1;
+				state_axi4 	   <= st1_axi4;
+				
+			end
+			else begin
+				axiBus.awaddr  <= 0;
+				axiBus.wdata   <= 0;
+				axiBus.awvalid <= 0;
+				axiBus.wvalid  <= 0;			
+			end
+		end
+		
+		st1_axi4 : begin
+			if(axiBus.awready) begin
+				axiBus.awaddr  <= 0;
+				axiBus.awvalid <= 0;
+				enAddr = 1;
+			end
+			if(axiBus.wready) begin
+				axiBus.wdata   <= 0;
+				axiBus.wvalid  <= 0;			
+				enData = 1;
+			end
+			
+			if(enAddr & enData) state_axi4 <= idle_axi4;
+		end
+		
+		default:;
+		
+	endcase
+	
+  end
+ end 
  
  //UART RX 
  //RX FSM

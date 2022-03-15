@@ -27,7 +27,7 @@
 
 #include "../../ibex_core_pkg/ibex_core.h"
  
-#define MTIMER_BASE _AC(0x40E0,UL)  /*!< MTIMER base address */
+#define MTIMER_BASE _AC(0x80E0,UL)  /*!< MTIMER base address */
 
 
 /* register definitions */

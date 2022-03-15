@@ -228,7 +228,7 @@
 	CPUctr.we  = 0;
 	CPUdat.be  = 4'b0000;
 
- 	#(10000*(`tm_scale));
+ 	#(200*(`tm_scale));
 	@(posedge Clk);
 	
 	fd = $fopen("log.txt","w");

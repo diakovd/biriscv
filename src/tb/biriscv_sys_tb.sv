@@ -43,12 +43,22 @@ module biriscv_sys_tb;
  );
 
 UART_emu   #(
-	.BaudRate(`BR115200) //9600
+	.BaudRate(`BR921600) //9600
  )
  UART_emu_inst(
-	.TX(RX), //TX UART line
+	.TX(), //TX UART line
 	.RX(TX) //RX UART line
  );
  
+ BootLoader_tb 
+ #(
+	.STPbyte(8'h55),
+	.ONbyte( 8'hAA),
+	.BaudRate(8) //9600
+ )  
+ BootLoader_tb_inst(
+	.TX(RX) //TX UART line
+ ); 
+
 
 endmodule
