@@ -8,6 +8,7 @@
 	input  RX,
 	output Clk14,
 	input  Clk125M,
+	input  Rst_n,
 //	output [31:0] LED,
 
   inout [53:0]FIXED_IO_mio,
@@ -38,7 +39,7 @@
 
     .Clk_50MHz(Clk_50MHz),
 	.Clk_14_7456MHz(Clk_14_7456MHz),
-    .sys_rst_n(sys_rst_n)	 
+    .sys_rst_n(Rst_n)	 
  );
 assign Clk14 = Clk_14_7456MHz;
 
@@ -49,6 +50,6 @@ design_1_wrapper design_1_wrapper_inst
         .FIXED_IO_ps_clk(FIXED_IO_ps_clk),
         .FIXED_IO_ps_porb(FIXED_IO_ps_porb),
         .FIXED_IO_ps_srstb(FIXED_IO_ps_srstb),
-        .RSTn(sys_rst_n));
+        .RSTn(Rst_n));
 
  endmodule
